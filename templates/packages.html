@@ -1,0 +1,15 @@
+<h1>Packages</h1>
+
+<ul>
+  <li ng-repeat='package in packages'>
+    <p>
+      <a ng-href='/package/{{package.Path}}'>path: {{package.Path}}</a>
+    </p>
+    <p>
+      stars: {{package.Stars}}
+    </p>
+    <p>
+      forks: {{package.Forks}}
+    </p>
+  </li>
+</ul>
