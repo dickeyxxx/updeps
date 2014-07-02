@@ -15,11 +15,6 @@ func Initialize(m martini.Router) {
 		r.JSON(201, pkg)
 	})
 
-	m.Post("/packages/refresh", func(models *models.Client) int {
-		Refresh(models)
-		return 200
-	})
-
 	m.Get("/packages", func(r render.Render, models *models.Client) {
 		packages, err := models.PackagesByStars()
 		if err != nil {

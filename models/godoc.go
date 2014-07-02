@@ -1,19 +1,36 @@
-package api
+package models
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
-
-	"github.com/dickeyxxx/updeps/models"
 )
 
 type response struct {
-	Results []models.Package
+	Results []Package
 }
 
-func Refresh(c *models.Client) {
+func (c *Client) RefreshPackages() {
+	packages := make(chan Package)
+	for i := 1; i <= 10; i++ {
+		go c.worker(packages, i)
+	}
+	for _, pkg := range fetchGodocPackages() {
+		packages <- pkg
+	}
+}
+
+func (c *Client) worker(packages <-chan Package, i int) {
+	for pkg := range packages {
+		fmt.Println("worker", i, "adding package", pkg)
+		if _, err := c.UpsertPackage(&pkg); err != nil {
+			panic(err)
+		}
+	}
+}
+
+func fetchGodocPackages() []Package {
 	client := &http.Client{}
 	resp, err := client.Get("http://api.godoc.org/packages")
 	if err != nil {
@@ -33,9 +50,6 @@ func Refresh(c *models.Client) {
 			pkg.GithubOwner = githubPath[1]
 			pkg.GithubName = githubPath[2]
 		}
-		fmt.Println("Adding", pkg)
-		if _, err = c.UpsertPackage(&pkg); err != nil {
-			panic(err)
-		}
 	}
+	return packages.Results
 }
