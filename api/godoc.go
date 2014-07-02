@@ -6,17 +6,14 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/google/go-github/github"
-
-	"labix.org/v2/mgo"
-	"labix.org/v2/mgo/bson"
+	"github.com/dickeyxxx/updeps/models"
 )
 
 type response struct {
-	Results []Package
+	Results []models.Package
 }
 
-func Refresh(db *mgo.Database) {
+func Refresh(c *models.Client) {
 	client := &http.Client{}
 	resp, err := client.Get("http://api.godoc.org/packages")
 	if err != nil {
@@ -29,29 +26,16 @@ func Refresh(db *mgo.Database) {
 		panic(err)
 	}
 	r := regexp.MustCompile("github.com/(.*)/(.*)")
-	c := db.C("packages")
-	githubClient := github.NewClient(nil)
 	for _, pkg := range packages.Results {
 		githubPath := r.FindStringSubmatch(pkg.Path)
 
 		if len(githubPath) != 0 {
-			githubInfo := fetchGithubInfo(githubPath[1], githubPath[2], githubClient)
-			pkg.Owner = *githubInfo.Owner.Name
-			pkg.Name = *githubInfo.Name
-			pkg.Forks = *githubInfo.ForksCount
-			pkg.Stars = *githubInfo.StargazersCount
+			pkg.GithubOwner = githubPath[1]
+			pkg.GithubName = githubPath[2]
 		}
 		fmt.Println("Adding", pkg)
-		if _, err = c.Upsert(bson.M{"Path": pkg.Path}, &pkg); err != nil {
+		if _, err = c.UpsertPackage(&pkg); err != nil {
 			panic(err)
 		}
 	}
-}
-
-func fetchGithubInfo(owner string, name string, client *github.Client) *github.Repository {
-	repo, _, err := client.Repositories.Get(owner, name)
-	if err != nil {
-		panic(err)
-	}
-	return repo
 }
