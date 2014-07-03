@@ -2,20 +2,15 @@ package models
 
 import (
 	"fmt"
-	"os"
 	"time"
 
-	"code.google.com/p/goauth2/oauth"
-
-	"github.com/google/go-github/github"
+	"github.com/dickeyxxx/updeps/config"
+	"github.com/dickeyxxx/updeps/github"
 )
 
 func (c *Client) RefreshPackagesGithub() {
 	packageChannel := make(chan Package)
-	t := &oauth.Transport{
-		Token: &oauth.Token{AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN")},
-	}
-	githubClient := github.NewClient(t.Client())
+	githubClient := config.Github()
 	for i := 0; i < 10; i++ {
 		go c.githubWorker(githubClient, packageChannel)
 	}
@@ -30,21 +25,10 @@ func (c *Client) RefreshPackagesGithub() {
 	}
 }
 
-func (c *Client) githubWorker(githubClient *github.Client, packages <-chan Package) {
+func (c *Client) githubWorker(github *github.Client, packages <-chan Package) {
 	for pkg := range packages {
-		repo, resp, err := githubClient.Repositories.Get(pkg.GithubOwner, pkg.GithubName)
-		if resp.StatusCode == 403 {
-			resp.Body.Close()
-			rateLimitUntil := c.githubRateLimitedUntil(githubClient)
-			fmt.Println("rate limited until", rateLimitUntil)
-			time.Sleep(-1 * time.Since(rateLimitUntil))
-			continue
-		} else if resp.StatusCode == 404 {
-			fmt.Println("404", pkg)
-			continue
-		}
+		repo, err := github.GetRepoInfo(pkg.GithubOwner, pkg.GithubName)
 		if err != nil {
-                        fmt.Println("Error processing", pkg)
 			panic(err)
 		}
 		pkg.GithubForks = *repo.ForksCount
@@ -55,10 +39,4 @@ func (c *Client) githubWorker(githubClient *github.Client, packages <-chan Packa
 			panic(err)
 		}
 	}
-}
-
-func (c *Client) githubRateLimitedUntil(githubClient *github.Client) time.Time {
-	rateLimits, _, err := githubClient.RateLimits()
-	if err != nil { panic(err) }
-	return rateLimits.Core.Reset.Time
 }

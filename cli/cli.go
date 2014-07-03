@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 	defer mongo.Close()
-	m := models.NewClient(mongo.DB("updeps"))
+	m := models.NewClient(mongo.DB("updeps"), config.Github())
 
 	app := cli.NewApp()
 	app.Name = "updeps server"
@@ -24,11 +24,6 @@ func main() {
 
 	app.Run(os.Args)
 }
-
-//func fetchGithubInfo(owner string, name string, client *github.Repository) {
-//repo, _, err := client.Repositories.Get(owner, name)
-//return repo, err
-//}
 
 func cliCommands(models *models.Client) []cli.Command {
 	return []cli.Command{
