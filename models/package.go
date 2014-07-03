@@ -35,7 +35,7 @@ func (c *Client) PackageByPath(path string) (*Package, error) {
 }
 
 func (c *Client) UpsertPackage(pkg *Package) (*mgo.ChangeInfo, error) {
-	return c.packagesCollection().Upsert(bson.M{"Path": pkg.Path}, &pkg)
+	return c.packagesCollection().Upsert(bson.M{"path": pkg.Path}, &pkg)
 }
 
 func (c *Client) packagesCollection() *mgo.Collection {
