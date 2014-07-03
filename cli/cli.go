@@ -6,7 +6,7 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/dickeyxxx/updeps/config"
-	"github.com/dickeyxxx/updeps/models"
+	"github.com/dickeyxxx/updeps/pkg"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 	defer mongo.Close()
-	m := models.NewClient(mongo.DB("updeps"), config.Github())
+	m := pkg.NewClient(mongo.DB("updeps"), config.Github())
 
 	app := cli.NewApp()
 	app.Name = "updeps server"
@@ -25,12 +25,12 @@ func main() {
 	app.Run(os.Args)
 }
 
-func cliCommands(models *models.Client) []cli.Command {
+func cliCommands(pkg *pkg.Client) []cli.Command {
 	return []cli.Command{
 		{
 			Name: "count",
 			Action: func(c *cli.Context) {
-				packages, err := models.AllPackages()
+				packages, err := pkg.AllPackages()
 				if err != nil {
 					panic(err)
 				}
@@ -41,13 +41,13 @@ func cliCommands(models *models.Client) []cli.Command {
 		{
 			Name: "refresh",
 			Action: func(c *cli.Context) {
-				models.RefreshPackages()
+				pkg.RefreshPackages()
 			},
 		},
 		{
 			Name: "github",
 			Action: func(c *cli.Context) {
-				models.RefreshPackagesGithub()
+				pkg.RefreshPackagesGithub()
 			},
 		},
 	}

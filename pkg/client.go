@@ -1,4 +1,4 @@
-package models
+package pkg
 
 import (
 	"github.com/dickeyxxx/updeps/github"

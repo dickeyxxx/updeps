@@ -1,31 +1,31 @@
 package api
 
 import (
-	"github.com/dickeyxxx/updeps/models"
+	"github.com/dickeyxxx/updeps/pkg"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/binding"
 	"github.com/martini-contrib/render"
 )
 
 func Initialize(m martini.Router) {
-	m.Post("/packages", binding.Bind(models.Package{}), func(pkg models.Package, r render.Render, models *models.Client) {
-		if _, err := models.UpsertPackage(&pkg); err != nil {
+	m.Post("/packages", binding.Bind(pkg.Package{}), func(pkg pkg.Package, r render.Render, pkgClient *pkg.Client) {
+		if _, err := pkgClient.UpsertPackage(&pkg); err != nil {
 			panic(err)
 		}
 		r.JSON(201, pkg)
 	})
 
-	m.Get("/packages", func(r render.Render, models *models.Client) {
-		packages, err := models.PackagesByStars()
+	m.Get("/packages", func(r render.Render, pkg *pkg.Client) {
+		packages, err := pkg.PackagesByStars()
 		if err != nil {
 			panic(err)
 		}
 		r.JSON(200, packages)
 	})
 
-	m.Get("/packages/**", func(r render.Render, params martini.Params, models *models.Client) {
+	m.Get("/packages/**", func(r render.Render, params martini.Params, pkg *pkg.Client) {
 		path := params["_1"]
-		result, err := models.PackageByPath(path)
+		result, err := pkg.PackageByPath(path)
 		if err != nil {
 			panic(err)
 		}
