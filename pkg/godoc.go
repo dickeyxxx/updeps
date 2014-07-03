@@ -21,10 +21,7 @@ func (c *Client) RefreshPackages() {
 
 func (c *Client) godocWorker(packages <-chan Package) {
 	for pkg := range packages {
-		existing, err := c.PackageByPath(pkg.Path)
-		if err != nil {
-			panic(err)
-		}
+		existing, _ := c.PackageByPath(pkg.Path)
 		if existing != nil {
 			continue
 		}

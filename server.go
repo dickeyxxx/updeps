@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/dickeyxxx/updeps/api"
+	"github.com/dickeyxxx/updeps/category"
 	"github.com/dickeyxxx/updeps/config"
 	"github.com/dickeyxxx/updeps/pkg"
 	"github.com/go-martini/martini"
@@ -21,7 +22,9 @@ func main() {
 	defer mongo.Close()
 	db := mongo.DB("updeps")
 	pkg := pkg.NewClient(db, nil)
+	category := category.NewClient(db)
 	m.Map(pkg)
+	m.Map(category)
 
 	m.Group("/api", func(r martini.Router) {
 		api.Initialize(r)

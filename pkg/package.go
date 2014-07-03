@@ -22,9 +22,9 @@ func (c *Client) AllPackages() ([]Package, error) {
 	return result, err
 }
 
-func (c *Client) PackagesByStars() ([]Package, error) {
+func (c *Client) PackagesByStars(limit int) ([]Package, error) {
 	var result []Package
-	err := c.packagesCollection().Find(bson.M{}).Sort("-github_stargazers").Limit(1000).All(&result)
+	err := c.packagesCollection().Find(bson.M{}).Sort("-github_stargazers").Limit(limit).All(&result)
 	return result, err
 }
 

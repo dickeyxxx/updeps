@@ -3,7 +3,7 @@ angular.module('app')
   $locationProvider.html5Mode(true)
   $routeProvider
   .when('/', { templateUrl: '/packages.html', controller: 'PackagesCtrl' })
-  .when('/add', { templateUrl: '/add_package.html', controller: 'AddPackageCtrl' })
   .when('/package/:path*', { templateUrl: '/package_detail.html', controller: 'PackageDetailCtrl' })
+  .when('/admin', { templateUrl: '/admin.html', controller: 'AdminCtrl' })
   .otherwise({redirectTo: '/'})
 })
