@@ -8,12 +8,12 @@ import (
 )
 
 type Package struct {
-	Path             string
-	GithubName       string
-	GithubOwner      string
-	GithubUpdatedAt  time.Time
-	GithubForks      int
-	GithubStargazers int
+	Path             string    `bson:"path,omitempty"`
+	GithubName       string    `bson:"github_name,omitempty"`
+	GithubOwner      string    `bson:"github_owner,omitempty"`
+	GithubUpdatedAt  time.Time `bson:"github_updated_at,omitempty"`
+	GithubForks      int       `bson:"github_forks,omitempty"`
+	GithubStargazers int       `bson:"github_stargazers,omitempty"`
 }
 
 func (c *Client) AllPackages() ([]Package, error) {

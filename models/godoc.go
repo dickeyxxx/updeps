@@ -16,9 +16,7 @@ func (c *Client) RefreshPackages() {
 	for i := 1; i <= 10; i++ {
 		go c.godocWorker(packages, i)
 	}
-	for _, pkg := range fetchGodocPackages() {
-		packages <- pkg
-	}
+	fetchGodocPackages(packages)
 }
 
 func (c *Client) godocWorker(packages <-chan Package, i int) {
@@ -30,7 +28,7 @@ func (c *Client) godocWorker(packages <-chan Package, i int) {
 	}
 }
 
-func fetchGodocPackages() []Package {
+func fetchGodocPackages(packageChannel chan Package) {
 	client := &http.Client{}
 	resp, err := client.Get("http://api.godoc.org/packages")
 	if err != nil {
@@ -50,6 +48,7 @@ func fetchGodocPackages() []Package {
 			pkg.GithubOwner = githubPath[1]
 			pkg.GithubName = githubPath[2]
 		}
+
+		packageChannel <- pkg
 	}
-	return packages.Results
 }
