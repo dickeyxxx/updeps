@@ -14,14 +14,14 @@ type response struct {
 func (c *Client) RefreshPackages() {
 	packages := make(chan Package)
 	for i := 1; i <= 10; i++ {
-		go c.godocWorker(packages, i)
+		go c.godocWorker(packages)
 	}
 	fetchGodocPackages(packages)
 }
 
-func (c *Client) godocWorker(packages <-chan Package, i int) {
+func (c *Client) godocWorker(packages <-chan Package) {
 	for pkg := range packages {
-		fmt.Println("worker", i, "adding package", pkg)
+		fmt.Println("adding package", pkg)
 		if _, err := c.UpsertPackage(&pkg); err != nil {
 			panic(err)
 		}
@@ -40,7 +40,7 @@ func fetchGodocPackages(packageChannel chan Package) {
 	if err := decoder.Decode(&packages); err != nil {
 		panic(err)
 	}
-	r := regexp.MustCompile("github.com/(.*)/(.*)")
+	r := regexp.MustCompile("github.com/([^/]+)/([^/]+)")
 	for _, pkg := range packages.Results {
 		githubPath := r.FindStringSubmatch(pkg.Path)
 

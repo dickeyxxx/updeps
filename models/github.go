@@ -35,14 +35,16 @@ func (c *Client) githubWorker(githubClient *github.Client, packages <-chan Packa
 		repo, resp, err := githubClient.Repositories.Get(pkg.GithubOwner, pkg.GithubName)
 		if resp.StatusCode == 403 {
 			resp.Body.Close()
-			fmt.Println("rate limited...")
-			time.Sleep(10 * time.Second)
+			rateLimitUntil := c.githubRateLimitedUntil(githubClient)
+			fmt.Println("rate limited until", rateLimitUntil)
+			time.Sleep(-1 * time.Since(rateLimitUntil))
 			continue
 		} else if resp.StatusCode == 404 {
 			fmt.Println("404", pkg)
 			continue
 		}
 		if err != nil {
+                        fmt.Println("Error processing", pkg)
 			panic(err)
 		}
 		pkg.GithubForks = *repo.ForksCount
@@ -53,4 +55,10 @@ func (c *Client) githubWorker(githubClient *github.Client, packages <-chan Packa
 			panic(err)
 		}
 	}
+}
+
+func (c *Client) githubRateLimitedUntil(githubClient *github.Client) time.Time {
+	rateLimits, _, err := githubClient.RateLimits()
+	if err != nil { panic(err) }
+	return rateLimits.Core.Reset.Time
 }
