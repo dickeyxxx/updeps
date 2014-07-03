@@ -6,3 +6,4 @@ fs.readdirSync(__dirname + '/gulp').forEach(function (task) {
 })
 
 gulp.task('watch', ['watch:scripts'])
+gulp.task('build', ['scripts'])
