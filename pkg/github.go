@@ -3,16 +3,12 @@ package pkg
 import (
 	"fmt"
 	"time"
-
-	"github.com/dickeyxxx/updeps/config"
-	"github.com/dickeyxxx/updeps/github"
 )
 
 func (c *Client) RefreshPackagesGithub() {
 	packageChannel := make(chan Package)
-	githubClient := config.Github()
 	for i := 0; i < 10; i++ {
-		go c.githubWorker(githubClient, packageChannel)
+		go c.githubWorker(packageChannel)
 	}
 	packages, err := c.AllPackages()
 	if err != nil {
@@ -25,9 +21,9 @@ func (c *Client) RefreshPackagesGithub() {
 	}
 }
 
-func (c *Client) githubWorker(github *github.Client, packages <-chan Package) {
+func (c *Client) githubWorker(packages <-chan Package) {
 	for pkg := range packages {
-		repo, err := github.GetRepoInfo(pkg.GithubOwner, pkg.GithubName)
+		repo, err := c.github.GetRepoInfo(pkg.GithubOwner, pkg.GithubName)
 		if err != nil {
 			panic(err)
 		}
