@@ -21,6 +21,13 @@ func (c *Client) RefreshPackages() {
 
 func (c *Client) godocWorker(packages <-chan Package) {
 	for pkg := range packages {
+		existing, err := c.PackageByPath(pkg.Path)
+		if err != nil {
+			panic(err)
+		}
+		if existing != nil {
+			continue
+		}
 		fmt.Println("adding package", pkg)
 		if _, err := c.UpsertPackage(&pkg); err != nil {
 			panic(err)
