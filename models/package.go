@@ -24,7 +24,7 @@ func (c *Client) AllPackages() ([]Package, error) {
 
 func (c *Client) PackagesByStars() ([]Package, error) {
 	var result []Package
-	err := c.packagesCollection().Find(bson.M{}).Sort("-githubstargazers").Limit(1000).All(&result)
+	err := c.packagesCollection().Find(bson.M{}).Sort("-github_stargazers").Limit(1000).All(&result)
 	return result, err
 }
 
