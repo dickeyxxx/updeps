@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"os"
 
-	"labix.org/v2/mgo"
-
 	"github.com/codegangsta/cli"
+	"github.com/dickeyxxx/updeps/config"
 	"github.com/dickeyxxx/updeps/models"
 )
 
 func main() {
-	mongo := mongoClient()
+	mongo, err := config.Mongo()
+	if err != nil {
+		panic(err)
+	}
 	defer mongo.Close()
 	m := models.NewClient(mongo.DB("updeps"))
 
@@ -54,12 +56,4 @@ func cliCommands(models *models.Client) []cli.Command {
 			},
 		},
 	}
-}
-
-func mongoClient() *mgo.Session {
-	mongo, err := mgo.Dial("localhost")
-	if err != nil {
-		panic(err)
-	}
-	return mongo
 }

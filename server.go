@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/dickeyxxx/updeps/api"
+	"github.com/dickeyxxx/updeps/config"
 	"github.com/dickeyxxx/updeps/models"
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
-	"labix.org/v2/mgo"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 	m.Use(martini.Static("assets"))
 	m.Use(render.Renderer())
 
-	mongo, err := mgo.Dial("localhost")
+	mongo, err := config.Mongo()
 	if err != nil {
 		panic(err)
 	}
