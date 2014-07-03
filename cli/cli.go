@@ -47,6 +47,12 @@ func cliCommands(models *models.Client) []cli.Command {
 				models.RefreshPackages()
 			},
 		},
+		{
+			Name: "github",
+			Action: func(c *cli.Context) {
+				models.RefreshPackagesGithub()
+			},
+		},
 	}
 }
 

@@ -1,16 +1,19 @@
 package models
 
 import (
+	"time"
+
 	"labix.org/v2/mgo"
 	"labix.org/v2/mgo/bson"
 )
 
 type Package struct {
-	Path        string
-	GithubName  string
-	GithubOwner string
-	Forks       int
-	Stars       int
+	Path             string
+	GithubName       string
+	GithubOwner      string
+	GithubUpdatedAt  time.Time
+	GithubForks      int
+	GithubStargazers int
 }
 
 func (c *Client) AllPackages() ([]Package, error) {
@@ -21,7 +24,7 @@ func (c *Client) AllPackages() ([]Package, error) {
 
 func (c *Client) PackagesByStars() ([]Package, error) {
 	var result []Package
-	err := c.packagesCollection().Find(bson.M{}).Sort("-stars").Limit(1000).All(&result)
+	err := c.packagesCollection().Find(bson.M{}).Sort("-githubstargazers").Limit(1000).All(&result)
 	return result, err
 }
 

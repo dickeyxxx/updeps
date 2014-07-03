@@ -14,14 +14,14 @@ type response struct {
 func (c *Client) RefreshPackages() {
 	packages := make(chan Package)
 	for i := 1; i <= 10; i++ {
-		go c.worker(packages, i)
+		go c.godocWorker(packages, i)
 	}
 	for _, pkg := range fetchGodocPackages() {
 		packages <- pkg
 	}
 }
 
-func (c *Client) worker(packages <-chan Package, i int) {
+func (c *Client) godocWorker(packages <-chan Package, i int) {
 	for pkg := range packages {
 		fmt.Println("worker", i, "adding package", pkg)
 		if _, err := c.UpsertPackage(&pkg); err != nil {
