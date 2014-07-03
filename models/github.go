@@ -16,9 +16,9 @@ func (c *Client) RefreshPackagesGithub() {
 		Token: &oauth.Token{AccessToken: os.Getenv("GITHUB_ACCESS_TOKEN")},
 	}
 	githubClient := github.NewClient(t.Client())
-	go c.githubWorker(githubClient, packageChannel)
-	go c.githubWorker(githubClient, packageChannel)
-	go c.githubWorker(githubClient, packageChannel)
+	for i := 0; i < 10; i++ {
+		go c.githubWorker(githubClient, packageChannel)
+	}
 	packages, err := c.AllPackages()
 	if err != nil {
 		panic(err)
@@ -33,16 +33,17 @@ func (c *Client) RefreshPackagesGithub() {
 func (c *Client) githubWorker(githubClient *github.Client, packages <-chan Package) {
 	for pkg := range packages {
 		repo, resp, err := githubClient.Repositories.Get(pkg.GithubOwner, pkg.GithubName)
+		if resp.StatusCode == 403 {
+			resp.Body.Close()
+			fmt.Println("rate limited...")
+			time.Sleep(10 * time.Second)
+			continue
+		} else if resp.StatusCode == 404 {
+			fmt.Println("404", pkg)
+			continue
+		}
 		if err != nil {
-			githubError, ok := err.(*github.ErrorResponse)
-			if ok && githubError.Response.StatusCode == 403 {
-				fmt.Println("Rate limited...")
-				resp.Body.Close()
-				time.Sleep(10 * time.Second)
-				continue
-			} else {
-				panic(err)
-			}
+			panic(err)
 		}
 		pkg.GithubForks = *repo.ForksCount
 		pkg.GithubStargazers = *repo.StargazersCount
