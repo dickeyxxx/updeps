@@ -1,35 +1,28 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
-	"github.com/dickeyxxx/updeps/api"
-	"github.com/dickeyxxx/updeps/category"
-	"github.com/dickeyxxx/updeps/config"
+	"github.com/dickeyxxx/updeps/languages"
 	"github.com/dickeyxxx/updeps/pkg"
-	"github.com/go-martini/martini"
-	"github.com/martini-contrib/render"
+	"github.com/gin-gonic/gin"
+	"labix.org/v2/mgo"
 )
 
 func main() {
-	m := martini.Classic()
-	m.Use(render.Renderer())
-	m.Use(func(res http.ResponseWriter) {
-		res.Header().Set("Access-Control-Allow-Origin", "*")
-	})
-
-	mongo, err := config.Mongo()
+	r := gin.Default()
+	session, err := mgo.Dial("localhost")
 	if err != nil {
 		panic(err)
 	}
-	defer mongo.Close()
-	db := mongo.DB("updeps")
-	pkg := pkg.NewClient(db, nil)
-	category := category.NewClient(db)
-	m.Map(pkg)
-	m.Map(category)
-	api.Initialize(m)
-
-	log.Fatal(http.ListenAndServe(":5001", m))
+	defer session.Close()
+	db := session.DB("updeps")
+	languagesClient := languages.NewClient(db.C("Languages"))
+	pkgClient := pkg.NewClient(db.C("Packages"))
+	r.Use(func(c *gin.Context) {
+		c.Set("LanguageClient", languagesClient)
+		c.Set("PkgClient", pkgClient)
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding")
+	})
+	Route(r)
+	r.Run(":5001")
 }

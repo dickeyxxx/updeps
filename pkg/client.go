@@ -1,16 +1,24 @@
 package pkg
 
 import (
-	"github.com/dickeyxxx/updeps/github"
 	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
 )
 
 type Client struct {
-	db     *mgo.Database
-	github *github.Client
+	db *mgo.Collection
 }
 
-func NewClient(db *mgo.Database, github *github.Client) *Client {
-	c := &Client{db, github}
-	return c
+func NewClient(db *mgo.Collection) *Client {
+	return &Client{db}
+}
+
+func (c *Client) Create(p *Pkg) error {
+	return c.db.Insert(p)
+}
+
+func (c *Client) List() ([]Pkg, error) {
+	var result []Pkg
+	err := c.db.Find(bson.M{}).All(&result)
+	return result, err
 }
