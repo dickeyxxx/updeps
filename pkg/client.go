@@ -5,11 +5,15 @@ import (
 	"labix.org/v2/mgo/bson"
 )
 
+type db interface {
+	C(name string) *mgo.Collection
+}
+
 type Client struct {
 	db *mgo.Collection
 }
 
-func NewClient(db *mgo.Database) *Client {
+func NewClient(db db) *Client {
 	return &Client{db.C("packages")}
 }
 

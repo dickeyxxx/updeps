@@ -20,6 +20,7 @@ func (e *fakeEngine) POST(path string, handlers ...gin.HandlerFunc) {
 func (e *fakeEngine) OPTIONS(path string, handlers ...gin.HandlerFunc) {
 	e.paths = append(e.paths, path)
 }
+func (e *fakeEngine) Use(middlewares ...gin.HandlerFunc) {}
 
 func TestRouter(t *testing.T) {
 	Convey("Given an engine", t, func() {

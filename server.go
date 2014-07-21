@@ -16,16 +16,15 @@ type server struct {
 
 func main() {
 	r := gin.Default()
+	api := api.NewClient(db())
+	api.Route(r)
+	r.Run(":5001")
+}
+
+func db() *mgo.Database {
 	session, err := mgo.Dial("localhost")
 	if err != nil {
 		panic(err)
 	}
-	defer session.Close()
-	api := api.NewClient(session.DB("updeps"))
-	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding")
-	})
-	api.Route(r)
-	r.Run(":5001")
+	return session.DB("updeps")
 }
