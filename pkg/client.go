@@ -9,8 +9,8 @@ type Client struct {
 	db *mgo.Collection
 }
 
-func NewClient(db *mgo.Collection) *Client {
-	return &Client{db}
+func NewClient(db *mgo.Database) *Client {
+	return &Client{db.C("packages")}
 }
 
 func (c *Client) Create(p *Pkg) error {

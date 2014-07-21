@@ -11,8 +11,8 @@ type Client struct {
 	db *mgo.Collection
 }
 
-func NewClient(db *mgo.Collection) ClientInterface {
-	return &Client{db}
+func NewClient(db *mgo.Database) ClientInterface {
+	return &Client{db.C("languages")}
 }
 
 func (c *Client) List() []Language {
