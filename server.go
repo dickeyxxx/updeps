@@ -1,6 +1,9 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/dickeyxxx/updeps/api"
 	"github.com/dickeyxxx/updeps/category"
 	"github.com/dickeyxxx/updeps/config"
@@ -11,9 +14,10 @@ import (
 
 func main() {
 	m := martini.Classic()
-	m.Use(martini.Static("templates"))
-	m.Use(martini.Static("assets"))
 	m.Use(render.Renderer())
+	m.Use(func(res http.ResponseWriter) {
+		res.Header().Set("Access-Control-Allow-Origin", "*")
+	})
 
 	mongo, err := config.Mongo()
 	if err != nil {
@@ -25,13 +29,7 @@ func main() {
 	category := category.NewClient(db)
 	m.Map(pkg)
 	m.Map(category)
+	api.Initialize(m)
 
-	m.Group("/api", func(r martini.Router) {
-		api.Initialize(r)
-	})
-
-	m.Get("**", func(r render.Render) {
-		r.HTML(200, "app", nil)
-	})
-	m.Run()
+	log.Fatal(http.ListenAndServe(":5001", m))
 }

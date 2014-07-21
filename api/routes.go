@@ -11,8 +11,4 @@ func Initialize(m martini.Router) {
 	m.Get("/packages/**", packageDetail)
 	m.Get("/categories", categoryList)
 	m.Post("/categories", binding.Bind(category.Category{}), categoryCreate)
-
-	m.Get("**", func() (int, string) {
-		return 404, "Not Found"
-	})
 }

@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "gulp": "^3.8.5",
-    "gulp-concat": "^2.2.0",
-    "gulp-ng-annotate": "^0.2.0"
-  }
-}
